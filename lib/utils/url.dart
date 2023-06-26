@@ -42,6 +42,8 @@ const getHomepageEvents = '$baseUri/homepage-events'; //Home page All events
 const getPastEvents = '$baseUri/getPastEvents';
 const getUpcomingEvents = '$baseUri/getUpcomingEvents';
 const getLiveEvents = '$baseUri/getLiveEvents';
+// ===============create order=============//
+const cartOrder = "$baseUri/create-order";
+const getCartOrder = "$baseUri/get-order/";
 
-const id = '648ff8ed5a9be414601a4565';
 String? tokenss;

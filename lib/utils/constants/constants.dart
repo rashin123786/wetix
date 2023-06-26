@@ -27,6 +27,6 @@ UserModel? userModel;
 String? token;
 String? specificUserId;
 CartModel? cartModel;
-
+Cart? cart;
 String? cartId;
 String? eventId;

@@ -7,9 +7,10 @@ const {
   getUpcomingEvents,
   getLiveEvents,
 } = require("../../controllers/users/dashboardController");
+const userAuth = require("../../middleware/auth");
 
 // Get dashboard information for a particular user
-router.get("/dashboard", getDashboardInfo);
+router.get("/dashboard", userAuth, getDashboardInfo);
 
 // Get events for homepage
 router.get("/homepage-events", getHomepageEvents);

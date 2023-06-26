@@ -2,47 +2,68 @@ const mongoose = require("mongoose");
 const Event = require("../../models/event");
 const Order = require("../../models/orders");
 
-// Get dashboard information for a particular user and event
 const getDashboardInfo = async (req, res) => {
   try {
-    const userId = req.query.user; // Get the user ID from the query parameter
-    const eventId = req.query.event; // Get the event ID from the query parameter
+    const { userId } = req.body; // Get the userId from the request body
 
-    const totalEvents = await Event.countDocuments({ userId }).maxTimeMS(30000);
+    const totalEvents = await Order.countDocuments({ userId });
     const currentDate = new Date();
     const upcomingEvents = await Event.countDocuments({
       userId,
-      date_time: { $gt: currentDate },
-    }).maxTimeMS(30000);
+      start_date: { $gt: currentDate },
+    });
     const ticketSale = await Order.countDocuments({
-      user: userId,
-      event: eventId,
+      userId,
       status: "placed",
-    }).maxTimeMS(30000);
-    const totalIncome = await Order.countDocuments({
-      user: userId,
-      event: eventId,
-      status: "placed",
-    }).maxTimeMS(30000);
-    const totalAttendee = await Order.aggregate(
-      [
-        { $match: { event: eventId, status: "placed" } },
-        { $group: { _id: null, total: { $sum: "$items.quantity" } } },
-      ],
-      { maxTimeMS: 30000 }
+    });
+
+    const totalOrders = await Order.find({ userId, status: "placed" });
+    const totalIncome = totalOrders.reduce(
+      (sum, order) => sum + order.total,
+      0
     );
 
+    const totalAttendeeResult = await Order.aggregate([
+      { $match: { status: "placed" } },
+      { $group: { _id: null, total: { $sum: "$items.quantity" } } },
+    ]);
+
+    const totalAttendee =
+      totalAttendeeResult && totalAttendeeResult.length > 0
+        ? totalAttendeeResult[0].total
+        : 0;
+
     res.json({
-      totalEvents,
-      upcomingEvents,
-      ticketSale,
-      totalIncome,
-      totalAttendee: totalAttendee[0]?.total || 0,
+      message: "Dashboard information retrieved successfully",
+      totalEvents: {
+        message: "Total events retrieved successfully",
+        value: totalEvents,
+      },
+      upcomingEvents: {
+        message: "Upcoming events fetched successfully",
+        value: upcomingEvents,
+      },
+      ticketSale: {
+        message: "Ticket sale count fetched successfully",
+        value: ticketSale,
+      },
+      totalIncome: {
+        message: "Total income calculated successfully",
+        value: totalIncome,
+      },
+      totalAttendee: {
+        message: "Total attendees calculated successfully",
+        value: totalAttendee,
+      },
     });
+
+
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Failed to get dashboard information" });
   }
 };
+
 
 // Get events for homepage
 const getHomepageEvents = async (req, res) => {

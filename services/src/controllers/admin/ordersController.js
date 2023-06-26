@@ -39,6 +39,9 @@ const createOrder = async (req, res) => {
 
     const savedOrder = await order.save();
 
+    // Remove the cart from the cart collection
+    await Cart.findByIdAndRemove(cartId);
+
     res.status(201).json({ message: "Order placed successfully", savedOrder });
   } catch (error) {
     console.error(error);

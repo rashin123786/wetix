@@ -1,5 +1,6 @@
 const Cart = require("../../models/cart");
 const Event = require("../../models/event");
+const Order = require("../../models/orders");
 
 const addToCart = async (req, res) => {
   try {
@@ -59,6 +60,7 @@ const addToCart = async (req, res) => {
 
 
 
+
 const getCartByUser = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -87,6 +89,7 @@ const getCartByUser = async (req, res) => {
       .json({ success: false, message: "Internal server error" });
   }
 };
+
 
 
 const removeFromCart = async (req, res) => {
