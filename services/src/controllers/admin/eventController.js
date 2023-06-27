@@ -1,5 +1,6 @@
 const Event = require("../../models/event");
 const User = require("../../models/user");
+const SaveEvent = require("../../models/save-event");
 const path = require("path");
 fs = require("fs");
 
@@ -56,7 +57,6 @@ const createEvent = async (req, res) => {
     res.status(500).json({ error: "Failed to create event" });
   }
 };
-
 
 // Update an existing event
 const updateEvent = async (req, res) => {
@@ -135,7 +135,7 @@ const getEventById = async (req, res) => {
     const { id } = req.params;
 
     // Find the event by id and is_default set to false
-    const event = await Event.findOne({ _id: id, is_default: false });
+    const event = await Event.findOne({ _id: id });
 
     if (!event) {
       return res.status(404).json({
@@ -388,7 +388,9 @@ const getLiveEvents = async (req, res) => {
 async function searchEventsByCategory(req, res) {
   try {
     const category = req.params.category.toLowerCase(); // Convert category to lowercase
-    const events = await Event.find({ eventCategory: { $regex: new RegExp('^' + category, 'i') } });
+    const events = await Event.find({
+      eventCategory: { $regex: new RegExp("^" + category, "i") },
+    });
 
     res.status(200).json({
       message: "Events retrieved successfully",
@@ -409,14 +411,66 @@ async function searchEventByEventName(req, res) {
     });
 
     res.status(200).json({
-      message: 'Events retrieved successfully',
+      message: "Events retrieved successfully",
       events,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to retrieve events' });
+    res.status(500).json({ error: "Failed to retrieve events" });
   }
 }
+
+// save Evets and  unsave events
+
+const saveEvent = async (req, res) => {
+  try {
+    const { userId, event } = req.body;
+
+    // Check if the event is already saved for the user
+    const existingSaveEvent = await SaveEvent.findOne({ userId, event });
+
+    if (existingSaveEvent) {
+      return res.status(400).json({ message: "Event is already saved" });
+    }
+
+    const saveEvent = new SaveEvent({
+      userId,
+      event,
+    });
+
+    const savedEvent = await saveEvent.save();
+
+    res.status(201).json({ message: "Event saved successfully", savedEvent });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to save the event" });
+  }
+};
+
+
+const unsavedEvent = async (req, res) => {
+  try {
+    const { userId, event } = req.body;
+
+    // Check if the event is unsaved for the user
+
+    const deletedEvent = await SaveEvent.findOneAndDelete({
+      userId,
+      event,
+    });
+
+    if (!deletedEvent) {
+      return res.status(400).json({ message: "Event already unSaved" });
+    }
+
+    res.status(200).json({ message: "Event saved successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to unsaved event" });
+  }
+};
+
+
 
 module.exports = {
   createEvent,
@@ -434,4 +488,6 @@ module.exports = {
   getLiveEvents,
   searchEventsByCategory,
   searchEventByEventName,
+  saveEvent,
+  unsavedEvent,
 };

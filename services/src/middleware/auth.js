@@ -3,7 +3,6 @@ const Token = require("../models/token");
 const userAuth = async (req, res, next) => {
   const token = req.header("Authorization");
   const userId = req.body.userId || req.params.userId;
-  console.log(userId);
 
   if (!token) {
     return res

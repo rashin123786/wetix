@@ -1,6 +1,6 @@
 //========Base Url ================//
 
-const baseUri = 'http://10.4.4.41:5000';
+const baseUri = 'http://192.168.43.114:5000';
 String? userObjectId;
 const itemId = '';
 const reviewId = '';

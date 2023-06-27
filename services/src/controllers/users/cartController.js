@@ -7,7 +7,7 @@ const addToCart = async (req, res) => {
     const { userId, event, item } = req.body;
 
     const foundEvent = await Event.findById(event);
-    console.log(foundEvent);
+
     if (!foundEvent) {
       return res.status(404).json({ error: "Event not found" });
     }
@@ -47,7 +47,7 @@ const addToCart = async (req, res) => {
       __v: cart.__v,
     };
 
-    console.log(response); // Check the response object in the console
+    // console.log(response); // Check the response object in the console
 
     res.status(200).json(response);
   } catch (error) {
@@ -58,15 +58,12 @@ const addToCart = async (req, res) => {
   }
 };
 
-
-
-
 const getCartByUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
     // Find all carts for the user
-    const carts = await Cart.find({ userId });
+    const carts = await Cart.find({ userId }).populate("event");
 
     if (carts.length === 0) {
       return res
@@ -89,8 +86,6 @@ const getCartByUser = async (req, res) => {
       .json({ success: false, message: "Internal server error" });
   }
 };
-
-
 
 const removeFromCart = async (req, res) => {
   try {
@@ -117,14 +112,12 @@ const removeFromCart = async (req, res) => {
   }
 };
 
-
-
 const updateItemCount = async (req, res) => {
   try {
-    const { cartId, userId, action } = req.body;
+    const { event, userId, action } = req.body;
 
     // Find the cart
-    const cart = await Cart.findById(cartId);
+    const cart = await Cart.findOne({ userId, event });
 
     if (!cart) {
       return res
@@ -133,7 +126,7 @@ const updateItemCount = async (req, res) => {
     }
 
     // Verify that the cart belongs to the specified user
-    if (cart.userId.toString() !== userId) {
+    if (cart?.userId?.toString() !== userId) {
       return res
         .status(401)
         .json({ success: false, message: "Unauthorized access to cart" });
@@ -151,12 +144,10 @@ const updateItemCount = async (req, res) => {
         item.quantity--;
         item.subtotal = item.price * item.quantity;
       } else {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "Cannot decrement item quantity below 1",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "Cannot decrement item quantity below 1",
+        });
       }
     } else {
       return res
@@ -184,7 +175,6 @@ const updateItemCount = async (req, res) => {
       .json({ success: false, message: "Internal server error" });
   }
 };
-
 
 module.exports = {
   addToCart,

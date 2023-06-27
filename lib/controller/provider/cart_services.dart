@@ -56,7 +56,7 @@ class cartController with ChangeNotifier {
 // ==========get cart data===============
   double? totalamount;
   Future<CartModel> getCartItem() async {
-    final url = "http://10.4.4.41:5000/cart/$specificUserId";
+    final url = "$getCartData$specificUserId";
     final headers = {
       "Authorization": token!,
       "Content-Type": "application/json"

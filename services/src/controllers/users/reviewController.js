@@ -1,12 +1,25 @@
 const Review = require("../../models/review");
 
-
 // Create a new review
 const createReview = async (req, res) => {
   try {
-    const { name, email, review, rating } = req.body;
+    const { userId, event, name, email, review, rating } = req.body;
+
+    const existingReview = await Review.findOne({ userId, event });
+
+    if (existingReview) {
+      return res
+        .status(400)
+        .json({ error: "Already reviewed for this event." });
+    }
+
+    if (!name || !email || !review || !rating) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
 
     const userReview = new Review({
+      userId,
+      event,
       name,
       email,
       review,
@@ -26,8 +39,10 @@ const createReview = async (req, res) => {
 
 // Get all reviews with count
 const getAllReviews = async (req, res) => {
+  const { id } = req.params;
+
   try {
-    const reviews = await Review.find();
+    const reviews = await Review.find({ event: id });
     const totalReviews = reviews.length;
 
     res.json({ reviews, totalReviews });
@@ -40,7 +55,7 @@ const getAllReviews = async (req, res) => {
 const getReviewById = async (req, res) => {
   try {
     const { reviewId } = req.params;
-    const review = await Review.findById(reviewId)
+    const review = await Review.findById(reviewId);
     if (!review) {
       return res.status(404).json({ error: "Review not found" });
     }
@@ -60,7 +75,7 @@ const updateReviewById = async (req, res) => {
       reviewId,
       { user, name, email, review, rating },
       { new: true }
-    )
+    );
 
     if (!updatedReview) {
       return res.status(404).json({ error: "Review not found" });
@@ -95,4 +110,3 @@ module.exports = {
   updateReviewById,
   deleteReviewById,
 };
-

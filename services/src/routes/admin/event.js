@@ -17,6 +17,8 @@ const {
   getLiveEvents,
   searchEventsByCategory,
   searchEventByEventName,
+  saveEvent,
+  unsavedEvent,
 } = require("../../controllers/admin/eventController");
 
 // POST /events
@@ -33,7 +35,10 @@ router.delete("/event/:userId", deleteEvent);
 router.get("/events", getEvents);
 
 //get events by id
-router.get("/events/:userId", getEventsById);
+router.get("/events/:userId", userAuth, getEventsById);
+
+//get event by id
+router.get("/event/:id", getEventById);
 
 // // POST /events
 // router.post("/create-event/:userId", createEvent);
@@ -68,10 +73,15 @@ router.get("/past-events", userAuth, getPastEvents);
 router.get("/upcoming-events", userAuth, getUpcomingEvents);
 router.get("/live-events", userAuth, getLiveEvents);
 
-
 // serach api searchEventsByCategory, searchEventByEventName
 
 router.get("/search-category/:category", userAuth, searchEventsByCategory);
 router.get("/search-Event-name/:eventName", userAuth, searchEventByEventName);
+
+
+//saved and unsaved event
+
+router.post("/saved-events/", userAuth, saveEvent);
+router.delete("/unsaved-events/", userAuth, unsavedEvent);
 
 module.exports = router;
